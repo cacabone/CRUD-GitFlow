@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
 
 function User() {
     const [users, setUsers] = useState([]);
 
     useEffect(() => {
-      axios.get('http://localhost:3000/api/users')
+      axios.get('http://localhost:5000/api/users')
         .then(response => {
           const data = response.data;
           if (Array.isArray(data)) {
@@ -41,7 +42,7 @@ function User() {
                     <td>{user.name}</td>
                     <td>{user.email}</td>
                     <td>
-                      <button className="btn btn-sm btn-warning me-2">Edit</button>
+                      <Link to={`/update/${user.id}`} className="btn btn-sm btn-warning me-2">Edit</Link>
                       <button className="btn btn-sm btn-danger">Delete</button>
                     </td>
                   </tr>
