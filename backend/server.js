@@ -77,6 +77,19 @@ if (require('fs').existsSync(buildPath)) {
   });
 }
 
+// DELETE user by id (accept /delete/:id and /user/:id for compatibility)
+app.delete(['/delete/:id', '/user/:id'], (req, res) => {
+  const sql = 'DELETE FROM users WHERE id = ?';
+  const userId = req.params.id;
+  db.query(sql, [userId], (err, result) => {
+    if (err) {
+      console.error('DB delete error:', err);
+      return res.status(500).json({ error: 'Database delete failed' });
+    }
+    return res.json({ success: true, affectedRows: result.affectedRows, id: userId });
+  });
+});
+
 app.put('/update/:id', (req, res) => {
   const { name, email, password = '' } = req.body;
   const sql = 'UPDATE users SET name = ?, email = ?, password = ? WHERE id = ?';
