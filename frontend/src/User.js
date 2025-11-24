@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
 
 function User() {
     const [users, setUsers] = useState([]);
 
     useEffect(() => {
-      axios.get('http://localhost:3000/api/users')
+      axios.get('http://localhost:5000/api/users')
         .then(response => {
           const data = response.data;
           if (Array.isArray(data)) {
@@ -26,7 +27,7 @@ function User() {
   return (
     <div className="d-flex vh-100 justify-content-center align-items-center">
       <div className='w-50 bg-light p-5 rounded shadow'>
-        <button className="btn btn-primary mb-4">Add</button>
+        <Link to="/create" className="btn btn-primary mb-4">Add</Link>
         <table className="table table-bordered">
          <thead>
           <tr>
