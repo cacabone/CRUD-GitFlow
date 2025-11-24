@@ -3,9 +3,10 @@ const cors = require('cors');
 const app = express();
 const path = require('path');
 const mysql = require('mysql2');
-const port = 3000;
+const port = process.env.PORT || 5000;
 
-app.use(cors());
+app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+app.use(express.json());
 
 const db = mysql.createConnection({
   host: 'localhost',
@@ -61,6 +62,46 @@ if (require('fs').existsSync(buildPath)) {
     res.sendFile(path.join(buildPath, 'index.html'));
   });
 }
+
+app.post('/create', (req, res) => {
+  // Accept password from client; if not provided, fall back to empty string
+  const { name, email, password = '' } = req.body;
+  const sql = 'INSERT INTO users (name, email, password) VALUES (?, ?, ?)';
+  db.query(sql, [name, email, password], (err, result) => {
+    if (err) {
+      console.error('DB insert error:', err);
+      return res.status(500).json({ error: 'Database insert failed' });
+    }
+    // return created resource info
+    return res.status(201).json({ id: result.insertId, name, email });
+  });
+});
+
+// Also accept POST to /users and /api/users (align with common frontend Axios usage)
+app.post('/users', (req, res) => {
+  const { name, email, password = '' } = req.body;
+  const sql = 'INSERT INTO users (name, email, password) VALUES (?, ?, ?)';
+  db.query(sql, [name, email, password], (err, result) => {
+    if (err) {
+      console.error('DB insert error:', err);
+      return res.status(500).json({ error: 'Database insert failed' });
+    }
+    return res.status(201).json({ id: result.insertId, name, email });
+  });
+});
+
+app.post('/api/users', (req, res) => {
+  const { name, email, password = '' } = req.body;
+  const sql = 'INSERT INTO users (name, email, password) VALUES (?, ?, ?)';
+  db.query(sql, [name, email, password], (err, result) => {
+    if (err) {
+      console.error('DB insert error:', err);
+      return res.status(500).json({ error: 'Database insert failed' });
+    }
+    return res.status(201).json({ id: result.insertId, name, email });
+  });
+});
+
 
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
