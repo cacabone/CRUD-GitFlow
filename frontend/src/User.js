@@ -24,6 +24,22 @@ function User() {
           console.error('There was an error fetching the data!', error);
         });
     }, []);
+
+    async function handleDelete(id) {
+      try {
+        const res = await axios.delete(`http://localhost:5000/delete/${id}`);
+        if (res && res.data && res.data.success) {
+          alert('User Deleted Successfully');
+          // Refresh the user list after deletion
+          setUsers(prevUsers => prevUsers.filter(user => (user.id || user.ID) !== id));
+        } else {
+          console.warn('Delete returned unexpected response', res && res.data);
+        }
+      } catch (error) {
+        console.error('There was an error deleting the user!', error);
+      }
+    }
+
   return (
     <div className="d-flex vh-100 justify-content-center align-items-center">
       <div className='w-50 bg-light p-5 rounded shadow'>
@@ -42,6 +58,8 @@ function User() {
                     <td>{user.name}</td>
                     <td>{user.email}</td>
                     <td>
+                      <button className="btn btn-sm btn-warning me-2">Edit</button>
+                      <button className="btn btn-sm btn-danger" onClick={e => handleDelete(user.id || user.ID)}>Delete</button>
                       <Link to={`/update/${user.id}`} className="btn btn-sm btn-warning me-2">Edit</Link>
                       <button className="btn btn-sm btn-danger">Delete</button>
                     </td>
