@@ -27,7 +27,7 @@ function User() {
   return (
     <div className="d-flex vh-100 justify-content-center align-items-center">
       <div className='w-50 bg-light p-5 rounded shadow'>
-        <button className="btn btn-primary mb-4">Add</button>
+        <Link to="/create" className="btn btn-primary mb-4">Add</Link>
         <table className="table table-bordered">
          <thead>
           <tr>
