@@ -47,6 +47,20 @@ app.get('/api/users', (req, res) => {
   });
 });
 
+// get single user by id
+app.get('/api/users/:id', (req, res) => {
+  const sql = 'SELECT * FROM users WHERE id = ? LIMIT 1';
+  const userId = req.params.id;
+  db.query(sql, [userId], (err, results) => {
+    if (err) {
+      console.error('DB query error:', err);
+      return res.status(500).json({ error: 'Database query failed' });
+    }
+    if (!results || results.length === 0) return res.status(404).json({ error: 'User not found' });
+    return res.json(results[0]);
+  });
+});
+
 // root route for sanity checks
 app.get('/', (req, res) => {
   res.json({ message: 'API is running', route: '/users' });
@@ -75,6 +89,59 @@ app.delete(['/delete/:id', '/user/:id'], (req, res) => {
     return res.json({ success: true, affectedRows: result.affectedRows, id: userId });
   });
 });
+
+app.put('/update/:id', (req, res) => {
+  const { name, email, password = '' } = req.body;
+  const sql = 'UPDATE users SET name = ?, email = ?, password = ? WHERE id = ?';
+  const userId = req.params.id;
+  db.query(sql, [name, email, password, userId], (err, result) => {
+    if (err) {
+      console.error('DB update error:', err);
+      return res.status(500).json({ error: 'Database update failed' });
+    }
+    return res.json({ affectedRows: result.affectedRows, id: userId, name, email });
+  });
+});
+
+app.post('/create', (req, res) => {
+  // Accept password from client; if not provided, fall back to empty string
+  const { name, email, password = '' } = req.body;
+  const sql = 'INSERT INTO users (name, email, password) VALUES (?, ?, ?)';
+  db.query(sql, [name, email, password], (err, result) => {
+    if (err) {
+      console.error('DB insert error:', err);
+      return res.status(500).json({ error: 'Database insert failed' });
+    }
+    // return created resource info
+    return res.status(201).json({ id: result.insertId, name, email });
+  });
+});
+
+// Also accept POST to /users and /api/users (align with common frontend Axios usage)
+app.post('/users', (req, res) => {
+  const { name, email, password = '' } = req.body;
+  const sql = 'INSERT INTO users (name, email, password) VALUES (?, ?, ?)';
+  db.query(sql, [name, email, password], (err, result) => {
+    if (err) {
+      console.error('DB insert error:', err);
+      return res.status(500).json({ error: 'Database insert failed' });
+    }
+    return res.status(201).json({ id: result.insertId, name, email });
+  });
+});
+
+app.post('/api/users', (req, res) => {
+  const { name, email, password = '' } = req.body;
+  const sql = 'INSERT INTO users (name, email, password) VALUES (?, ?, ?)';
+  db.query(sql, [name, email, password], (err, result) => {
+    if (err) {
+      console.error('DB insert error:', err);
+      return res.status(500).json({ error: 'Database insert failed' });
+    }
+    return res.status(201).json({ id: result.insertId, name, email });
+  });
+});
+
 
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);

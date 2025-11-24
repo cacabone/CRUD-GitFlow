@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
 
 function User() {
     const [users, setUsers] = useState([]);
@@ -42,7 +43,7 @@ function User() {
   return (
     <div className="d-flex vh-100 justify-content-center align-items-center">
       <div className='w-50 bg-light p-5 rounded shadow'>
-        <button className="btn btn-primary mb-4">Add</button>
+        <Link to="/create" className="btn btn-primary mb-4">Add</Link>
         <table className="table table-bordered">
          <thead>
           <tr>
@@ -59,6 +60,8 @@ function User() {
                     <td>
                       <button className="btn btn-sm btn-warning me-2">Edit</button>
                       <button className="btn btn-sm btn-danger" onClick={e => handleDelete(user.id || user.ID)}>Delete</button>
+                      <Link to={`/update/${user.id}`} className="btn btn-sm btn-warning me-2">Edit</Link>
+                      <button className="btn btn-sm btn-danger">Delete</button>
                     </td>
                   </tr>
                 ))}
