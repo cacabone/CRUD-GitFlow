@@ -3,9 +3,10 @@ const cors = require('cors');
 const app = express();
 const path = require('path');
 const mysql = require('mysql2');
-const port = 3000;
+const port = process.env.PORT || 5000;
 
-app.use(cors());
+app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+app.use(express.json());
 
 const db = mysql.createConnection({
   host: 'localhost',
@@ -61,6 +62,19 @@ if (require('fs').existsSync(buildPath)) {
     res.sendFile(path.join(buildPath, 'index.html'));
   });
 }
+
+// DELETE user by id (accept /delete/:id and /user/:id for compatibility)
+app.delete(['/delete/:id', '/user/:id'], (req, res) => {
+  const sql = 'DELETE FROM users WHERE id = ?';
+  const userId = req.params.id;
+  db.query(sql, [userId], (err, result) => {
+    if (err) {
+      console.error('DB delete error:', err);
+      return res.status(500).json({ error: 'Database delete failed' });
+    }
+    return res.json({ success: true, affectedRows: result.affectedRows, id: userId });
+  });
+});
 
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
