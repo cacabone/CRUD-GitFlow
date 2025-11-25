@@ -1,70 +1,118 @@
-# Getting Started with Create React App
+CRUD-GitFlow — Local setup
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This repository is a small full-stack CRUD example (React frontend + Express + MySQL backend). These instructions will get the project running locally for development.
 
-## Available Scripts
+## Prerequisites
 
-In the project directory, you can run:
+- Node.js (recommended v18+) and npm
+- MySQL server (or compatible, e.g. MariaDB)
 
-### `npm start`
+## Database setup
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+1. Start your MySQL server and create a database named `crud` (or choose another name and update backend config).
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Example SQL (run in MySQL client):
 
-### `npm test`
+```sql
+CREATE DATABASE IF NOT EXISTS crud;
+USE crud;
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+CREATE TABLE IF NOT EXISTS users (
+	id INT AUTO_INCREMENT PRIMARY KEY,
+	name VARCHAR(255) NOT NULL,
+	email VARCHAR(255) NOT NULL,
+	password VARCHAR(255) NOT NULL DEFAULT ''
+);
+```
 
-### `npm run build`
+Notes:
+- The `password` column uses a default empty string here so examples that don't send a password will not fail. For production you should store hashed passwords and enforce proper constraints.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Configure backend credentials
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+By default the backend reads credentials from `server.js`. Open `backend/server.js` and update the MySQL connection block with your `host`, `user`, `password`, and `database` values if needed.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Optional (recommended): change the code to use environment variables and a `.env` file — for a small demo it's OK to keep credentials in `server.js`, but never commit real passwords.
 
-### `npm run eject`
+## Install dependencies
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+Open two terminals (one for backend, one for frontend).
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Backend:
+```powershell
+cd backend
+npm install
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Frontend:
+```powershell
+cd frontend
+npm install
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Start the app
 
-## Learn More
+1. Start the backend server (this example expects port 5000, but server may use `process.env.PORT` or a different port in the current branch):
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```powershell
+cd backend
+npm start
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+You should see a message like `Server is running at http://localhost:5000` and a MySQL connection log.
 
-### Code Splitting
+2. Start the frontend dev server:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+```powershell
+cd frontend
+npm start
+```
 
-### Analyzing the Bundle Size
+Open your browser at `http://localhost:3000` (Create React App default). The frontend will make API calls to the backend (default backend port used by this branch is shown in code). If the frontend uses a proxy in `package.json`, API requests can be relative (e.g. `/api/users`).
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## Test the API manually
 
-### Making a Progressive Web App
+From PowerShell you can run quick requests:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+Create user:
+```powershell
+Invoke-RestMethod -Uri http://localhost:5000/create -Method Post -ContentType 'application/json' -Body ('{"name":"Alice","email":"alice@example.com"}')
+```
 
-### Advanced Configuration
+List users:
+```powershell
+Invoke-RestMethod -Uri http://localhost:5000/api/users -Method Get
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+Delete user (id=1 example):
+```powershell
+Invoke-RestMethod -Uri http://localhost:5000/delete/1 -Method Delete
+```
 
-### Deployment
+Adjust the port if your backend is configured to run on a different port in the active branch.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+## CORS and Ports
 
-### `npm run build` fails to minify
+- During development the frontend runs on `localhost:3000` and the backend on a different port (commonly `5000`). The backend should enable CORS for the frontend origin (example: `http://localhost:3000`) — this is handled in the branches we've been working on.
+- Alternatively, the frontend `package.json` can include a `proxy` entry to forward unrecognized requests to the backend during `npm start`.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## Security notes
+
+- Do not store plaintext passwords in production. Use a hashing library (e.g., `bcrypt`) and never log passwords.
+- Do not commit database credentials to source control. Use environment variables in production.
+
+## Troubleshooting
+
+- If you see CORS errors in the browser console, verify the backend's CORS configuration and correct frontend origin.
+- If a DB insert fails with `Field 'password' doesn't have a default value`, either recreate the `users` table with the `password` default shown above or include a `password` field in your create requests.
+- If ports differ across branches, open the backend `server.js` to confirm the configured port and update the frontend API URLs or `proxy` accordingly.
+
+## Contributing / Notes for maintainers
+
+- There are several branches in this repo that exercise different flows (create, update, delete). When switching branches, double-check `backend/server.js` and `frontend/src/*` for port and route changes.
+- For production deployments, serve the built frontend from a static host (or from the backend's static folder) and configure secure cookies / CORS accordingly.
+
+Enjoy! If you want, I can also:
+- Add a `.env`-based config to the backend and update README with exact `.env` keys, or
+- Add a tiny script to initialize the DB automatically.
+
