@@ -58,10 +58,8 @@ function User() {
                     <td>{user.name}</td>
                     <td>{user.email}</td>
                     <td>
-                      <button className="btn btn-sm btn-warning me-2">Edit</button>
-                      <button className="btn btn-sm btn-danger" onClick={e => handleDelete(user.id || user.ID)}>Delete</button>
                       <Link to={`/update/${user.id}`} className="btn btn-sm btn-warning me-2">Edit</Link>
-                      <button className="btn btn-sm btn-danger">Delete</button>
+                      <button className="btn btn-sm btn-danger" onClick={e => handleDelete(user.id || user.ID)}>Delete</button>                      
                     </td>
                   </tr>
                 ))}
