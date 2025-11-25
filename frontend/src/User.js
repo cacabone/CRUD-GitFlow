@@ -41,30 +41,43 @@ function User() {
     }
 
   return (
-    <div className="d-flex vh-100 justify-content-center align-items-center">
-      <div className='w-50 bg-light p-5 rounded shadow'>
-        <Link to="/create" className="btn btn-primary mb-4">Add</Link>
-        <table className="table table-bordered">
-         <thead>
-          <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Actions</th>
-          </tr>
-         </thead>
-          <tbody>
+    <div className="container py-5">
+      <div className="d-flex align-items-center justify-content-between mb-4">
+        <h1 className="h3 mb-0">Users</h1>
+        <Link to="/create" className="btn btn-primary">+ Add User</Link>
+      </div>
+
+      <div className="card shadow-sm">
+        <div className="card-body">
+          <div className="table-responsive">
+            <table className="table table-striped table-hover align-middle mb-0">
+              <thead className="table-light">
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th className="text-end">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.length === 0 && (
+                  <tr>
+                    <td colSpan="3" className="text-center py-4 text-muted">No users found</td>
+                  </tr>
+                )}
                 {users.map((user) => (
-                  <tr key={user.id}>
+                  <tr key={user.id || user.ID}>
                     <td>{user.name}</td>
                     <td>{user.email}</td>
-                    <td>
-                      <Link to={`/update/${user.id}`} className="btn btn-sm btn-warning me-2">Edit</Link>
-                      <button className="btn btn-sm btn-danger" onClick={e => handleDelete(user.id || user.ID)}>Delete</button>                      
+                    <td className="text-end">
+                      <Link to={`/update/${user.id || user.ID}`} className="btn btn-sm btn-outline-warning me-2">Edit</Link>
+                      <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(user.id || user.ID)}>Delete</button>
                     </td>
                   </tr>
                 ))}
-          </tbody>
-        </table>                
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   );
